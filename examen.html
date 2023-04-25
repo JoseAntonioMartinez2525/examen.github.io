@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pizzas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+</head>
+<body>
+    <label for="slices">Número de partes:</label>
+    <input type="number" id="slices" name="slices" min="1" max="100" value="3">
+    <canvas id="canvas"></canvas>
+</body>
+<script>
+    const slices = document.getElementById("slices");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    
+    function setup() {
+        createCanvas(windowWidth, windowHeight);
+			background(255);
+    }
+    
+    function draw() {
+    background(220);
+    drawPizzaBresenham(width / 2 - 10, height / 2, 200, slices.value);
+    fill("green");
+    text("Bresenham", width / 2 + 40, height / 4);
+
+    drawPizzaDDA(width / 2 - 220, height / 2, 200, slices.value);
+    fill("blue");    
+    text("DDA", width / 2 - 150, height / 4);
+
+    drawPizzaPuntoPendiente(width / 2 - 430, height / 2, 200, slices.value);
+    fill("red");
+    text("Punto-Pendiente", width / 2 - 425, height / 4);
+    textSize(24);
+}
+
+    function drawPizzaPuntoPendiente(x, y, size, parts) {
+        const radius = size / 2;
+        const centerX = x + radius;
+        const centerY = y + radius;
+        const angle = 2 * Math.PI / parts; // Calcular el ángulo de cada parte
+        
+        // Dibujar el círculo completo
+        strokeWeight(2);
+        stroke(0);
+        noFill();
+        circle(centerX, centerY, size);
+        
+        // Dibujar las partes iguales
+        for (let i = 0; i < parts; i++) {
+            const startAngle = angle * i;
+            const endAngle = startAngle + angle;
+            
+            // Calcular las coordenadas de los extremos de la línea
+            const startX = centerX + radius * Math.cos(startAngle);
+            const startY = centerY + radius * Math.sin(startAngle);
+            const endX = centerX + radius * Math.cos(endAngle);
+            const endY = centerY + radius * Math.sin(endAngle);
+            
+            // Dibujar la línea que divide la parte
+            line(centerX, centerY, startX, startY);
+            line(centerX, centerY, endX, endY);
+        }
+    }
+    //pizza 2
+    function drawPizzaDDA(x, y, size, parts) {
+        const radius = size / 2;
+        const centerX = x + radius;
+        const centerY = y + radius;
+        const angle = 2 * Math.PI / parts; // Calcular el ángulo de cada parte
+        
+        // Dibujar el círculo completo
+        strokeWeight(2);
+        stroke(0);
+        noFill();
+        circle(centerX, centerY, size);
+        
+        // Dibujar las partes iguales
+        for (let i = 0; i < parts; i++) {
+            const startAngle = angle * i;
+            const endAngle = startAngle + angle;
+            
+            // Calcular las coordenadas de los extremos de la línea
+            const startX = centerX + radius * Math.cos(startAngle);
+            const startY = centerY + radius * Math.sin(startAngle);
+            const endX = centerX + radius * Math.cos(endAngle);
+            const endY = centerY + radius * Math.sin(endAngle);
+            
+            // Dibujar la línea que divide la parte usando el algoritmo de DDA
+            drawDDALine(centerX, centerY, startX, startY);
+            drawDDALine(centerX, centerY, endX, endY);
+        }
+    }
+    
+    function drawDDALine(x1, y1, x2, y2) {
+        // Calcular la diferencia en x y y
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        
+        // Calcular el número de pasos
+        const steps = Math.max(Math.abs(dx), Math.abs(dy));
+        
+        // Calcular la longitud de cada paso en x y y
+        const xStep = dx / steps;
+        const yStep = dy / steps;
+        
+        let x = x1;
+        let y = y1;
+        
+        // Dibujar cada punto en la línea
+        for (let i = 0; i <= steps; i++) {
+            point(x, y);
+            x += xStep;
+            y += yStep;
+        }
+    }
+
+    //pizza 3
+    function drawPizzaBresenham(x, y, size, parts) {
+    const radius = size / 2;
+    const centerX = x + radius;
+    const centerY = y + radius;
+    const angle = 2 * Math.PI / parts; // Calcular el ángulo de cada parte
+    
+    // Dibujar el círculo completo
+    strokeWeight(2);
+    stroke(0);
+    noFill();
+    circle(centerX, centerY, size);
+    
+    // Dibujar las partes iguales
+    for (let i = 0; i < parts; i++) {
+        const startAngle = angle * i;
+        const endAngle = startAngle + angle;
+        
+        // Calcular las coordenadas de los extremos de la línea
+        const startX = centerX + radius * Math.cos(startAngle);
+        const startY = centerY + radius * Math.sin(startAngle);
+        const endX = centerX + radius * Math.cos(endAngle);
+        const endY = centerY + radius * Math.sin(endAngle);
+        
+        // Dibujar la línea que divide la parte usando el algoritmo de Bresenham
+        drawBresenhamLine(centerX, centerY, startX, startY);
+        drawBresenhamLine(centerX, centerY, endX, endY);
+    }
+}
+
+function drawBresenhamLine(x1, y1, x2, y2) {
+    // Calcular la diferencia en x y y
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    
+    // Determinar la dirección de los pasos
+    const xStep = dx > 0 ? 1 : -1;
+    const yStep = dy > 0 ? 1 : -1;
+    
+    // Convertir las diferencias a valores positivos
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    
+    // Determinar la pendiente y la constante de Bresenham
+    const slope = absDy > absDx ? absDx / absDy : absDy / absDx;
+    const bresConst = absDy > absDx ? xStep : yStep;
+    
+    let x = x1;
+    let y = y1;
+    let error = 0;
+    
+    // Dibujar cada punto en la línea
+    if (absDy > absDx) {
+        for (let i = 0; i <= absDy; i++) {
+            point(x, y);
+            error += slope;
+            if (error >= 0.5) {
+                x += xStep;
+                error -= 1.0;
+            }
+            y += yStep;
+        }
+    } else {
+        for (let i = 0; i <= absDx; i++) {
+            point(x, y);
+            error += slope;
+            if (error >= 0.5) {
+                y += yStep;
+                error -= 1.0;
+            }
+            x += xStep;
+        }
+    }
+}  
+
+
+</script>
+</html>

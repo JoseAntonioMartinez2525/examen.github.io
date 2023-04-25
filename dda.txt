@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DDA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+</head>
+<body>
+    <label for="slices">Número de partes:</label>
+    <input type="number" id="slices" name="slices" min="1" max="12" value="3">
+    <br>
+    <canvas id="canvas"></canvas>
+</body>
+<script>
+    const canvasWidth = 500;
+    const canvasHeight = 500;
+    const slices = document.getElementById("slices");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    
+    function setup() {
+        createCanvas(canvasWidth, canvasHeight);
+    }
+    
+    function draw() {
+        background(220);
+        drawPizza(width / 2 - 200, height / 2, 100, slices.value);
+    }
+    
+    function drawPizzaDDA(x, y, size, parts) {
+        const radius = size / 2;
+        const centerX = x + radius;
+        const centerY = y + radius;
+        const angle = 2 * Math.PI / parts; // Calcular el ángulo de cada parte
+        
+        // Dibujar el círculo completo
+        strokeWeight(2);
+        stroke(0);
+        noFill();
+        circle(centerX, centerY, size);
+        
+        // Dibujar las partes iguales
+        for (let i = 0; i < parts; i++) {
+            const startAngle = angle * i;
+            const endAngle = startAngle + angle;
+            
+            // Calcular las coordenadas de los extremos de la línea
+            const startX = centerX + radius * Math.cos(startAngle);
+            const startY = centerY + radius * Math.sin(startAngle);
+            const endX = centerX + radius * Math.cos(endAngle);
+            const endY = centerY + radius * Math.sin(endAngle);
+            
+            // Dibujar la línea que divide la parte usando el algoritmo de DDA
+            drawDDALine(centerX, centerY, startX, startY);
+            drawDDALine(centerX, centerY, endX, endY);
+        }
+    }
+    
+    function drawDDALine(x1, y1, x2, y2) {
+        // Calcular la diferencia en x y y
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        
+        // Calcular el número de pasos
+        const steps = Math.max(Math.abs(dx), Math.abs(dy));
+        
+        // Calcular la longitud de cada paso en x y y
+        const xStep = dx / steps;
+        const yStep = dy / steps;
+        
+        let x = x1;
+        let y = y1;
+        
+        // Dibujar cada punto en la línea
+        for (let i = 0; i <= steps; i++) {
+            point(x, y);
+            x += xStep;
+            y += yStep;
+        }
+    }
+</script>
+</html>
